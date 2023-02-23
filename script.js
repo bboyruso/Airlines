@@ -11,10 +11,21 @@ const flights = [
   { id: 09, to: "Tel-Aviv", from: "Madrid", cost: 150, layover: false },
 ];
 
+const cleanText = (text) => {
+  text = text.replaceAll("false", " no");
+  text = text.replaceAll("true", " yes");
+  text = text.replaceAll("},", "\n");
+  text = text.replaceAll("[", "");
+  text = text.replaceAll("]", "");
+  text = text.replaceAll("{", "");
+  text = text.replaceAll("}", "");
+  return text.replace(/"/gi, " ");
+};
+
 const showFlights = () => {
   const myJSON = JSON.stringify(flights);
-  alert(`Showing all flights :
-  ${myJSON}`);
+  let res = cleanText(myJSON);
+  alert(`Showing all flights : \n${res}`);
 };
 
 const leaveOrStay = () => {
@@ -26,13 +37,19 @@ const leaveOrStay = () => {
 
 const greeting = () => {
   const sign = window.prompt("What is your name?");
-  alert(`Welcome ${sign} !`);
+  if (sign === null) {
+    greeting();
+    return;
+  } else {
+    alert(`Welcome ${sign} !`);
+  }
 };
 
 const startMenu = () => {
   const adminOrUser = window.prompt("Are you ADMIN or USER?");
-
-  if (adminOrUser.toUpperCase() === "ADMIN") {
+  if (adminOrUser === null) {
+    leaveOrStay();
+  } else if (adminOrUser.toUpperCase() === "ADMIN") {
     signInAdmin();
   } else if (adminOrUser.toUpperCase() === "USER") {
     signInUser();
@@ -52,7 +69,11 @@ const signInUser = () => {
     signInUser();
   }
   const myJSON = JSON.stringify(choosePrice);
-  alert(myJSON);
+  alert(
+    `We find ${
+      choosePrice.length
+    } flights for you with price ${price} or below :\n${cleanText(myJSON)}`
+  );
   leaveOrStay();
 };
 
