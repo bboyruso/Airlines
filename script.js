@@ -134,7 +134,7 @@ const addFlights = () => {
       alertInvalidInput();
     }
 
-    const layover = window.prompt(`
+    let layover = window.prompt(`
 The flight has layover?
 type : true or false`);
     if (layover === null) {
