@@ -61,9 +61,9 @@ const startMenu = () => {
   const adminOrUser = window.prompt("Are you ADMIN or USER?");
   if (adminOrUser === null) {
     leaveOrStay();
-  } else if (adminOrUser.toUpperCase() === "A") {
+  } else if (adminOrUser.toUpperCase() === "ADMIN") {
     signInAdmin();
-  } else if (adminOrUser.toUpperCase() === "U") {
+  } else if (adminOrUser.toUpperCase() === "USER") {
     signInUser();
   } else {
     alert(`You should chose ADMIN or USER.`);
@@ -120,18 +120,26 @@ const deleteFlights = () => {
 const addFlights = () => {
   if (flights.length < 15) {
     const from = window.prompt(`Adding flight from?`);
+    if (from === null) {
+      signInAdmin();
+    }
     checkIsLetter(from);
     const to = window.prompt(`Destination is to?`);
+    if (to === null) {
+      signInAdmin();
+    }
     checkIsLetter(to);
     const price = window.prompt(`Prise of flight is?`);
     if (!Number.isInteger(parseInt(price))) {
       alertInvalidInput();
     }
 
-    let layover = window.prompt(`
+    const layover = window.prompt(`
 The flight has layover?
 type : true or false`);
-    if (layover.toLowerCase() === "true") {
+    if (layover === null) {
+      signInAdmin();
+    } else if (layover.toLowerCase() === "true") {
       layover = !!"false";
     } else if (layover.toLowerCase() === "false") {
       layover = false;
@@ -171,13 +179,12 @@ const signInAdmin = () => {
   const addDelete = window.prompt(`
   For delete flights type : DELETE
   For ADD flights type : ADD
-  
   `);
   if (addDelete === null) {
     startMenu();
-  } else if (addDelete.toUpperCase() === "A") {
+  } else if (addDelete.toUpperCase() === "ADD") {
     addFlights();
-  } else if (addDelete.toUpperCase() === "D") {
+  } else if (addDelete.toUpperCase() === "DELETE") {
     deleteFlights();
   } else leaveOrStay();
 };
