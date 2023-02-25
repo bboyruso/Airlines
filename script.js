@@ -75,6 +75,11 @@ const signInUser = () => {
   alert(`You are in the USER menu.`);
   showFlights();
   const price = window.prompt("What is the max price per flight");
+
+  if (price === null) {
+    leaveOrStay();
+  }
+
   const choosePrice = flights.filter((flights) => flights.cost <= price);
   if (choosePrice.length === 0) {
     alert(`Here is 0 matches in your query`);
@@ -179,6 +184,7 @@ const signInAdmin = () => {
   const addDelete = window.prompt(`
   For delete flights type : DELETE
   For ADD flights type : ADD
+  
   `);
   if (addDelete === null) {
     startMenu();
