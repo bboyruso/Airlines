@@ -12,14 +12,26 @@ const flights = [
 ];
 
 const cleanText = (text) => {
-  text = text.replaceAll("false", " no");
-  text = text.replaceAll("true", " yes");
-  text = text.replaceAll("},", "\n");
-  text = text.replaceAll("[", "");
-  text = text.replaceAll("]", "");
-  text = text.replaceAll("{", "");
-  text = text.replaceAll("}", "");
-  return text.replace(/"/gi, " ");
+  text = text.replaceAll("id", "Flight");
+  text = text.replace(/\W/g, " ");
+  text = text.replace(/ {1,}/g, " ");
+  text = text.replaceAll("cost", "has a cost of");
+  text = text.replaceAll("layover", "");
+  text = text.replaceAll("true", "and has a layover.");
+  text = text.replaceAll("false", "and doesn't has a layover.");
+  return text.replaceAll(".", ".\n");
+};
+
+const alertInvalidInput = () => {
+  alert(`Invalid data input.`);
+  addFlights();
+};
+
+const checkIsLetter = (input) => {
+  const letters = /^[A-Za-z]+$/;
+  if (!input.match(letters)) {
+    alertInvalidInput();
+  }
 };
 
 const showFlights = () => {
@@ -49,9 +61,9 @@ const startMenu = () => {
   const adminOrUser = window.prompt("Are you ADMIN or USER?");
   if (adminOrUser === null) {
     leaveOrStay();
-  } else if (adminOrUser.toUpperCase() === "ADMIN") {
+  } else if (adminOrUser.toUpperCase() === "A") {
     signInAdmin();
-  } else if (adminOrUser.toUpperCase() === "USER") {
+  } else if (adminOrUser.toUpperCase() === "U") {
     signInUser();
   } else {
     alert(`You should chose ADMIN or USER.`);
@@ -78,21 +90,44 @@ const signInUser = () => {
 };
 
 const deleteFlights = () => {
+  if (flights.length === 0) {
+    alert(`There is no flights`);
+    signInAdmin();
+    return;
+  }
+
   showFlights();
-  const deleteNum = window.prompt(`Which flight do you want to delete?
-  0 - Its a first flight from the top of list
-  ${flights.length - 1} - Its the last flight from the top of the list
-  Type any number from 0 to ${flights.length - 1}  
+  const deleteNum =
+    window.prompt(`Please type Id number of the flight you want to delete.
   `);
-  flights.splice(deleteNum, 1);
-  signInAdmin();
+
+  if (deleteNum === null) {
+    signInAdmin();
+  }
+
+  const findID = flights.findIndex(
+    (flight) => flight.id === parseInt(deleteNum)
+  );
+  if (findID < 0) {
+    alert(`Flight with id: ${deleteNum} doesn't exist`);
+    deleteFlights();
+  }
+
+  flights.splice(findID, 1);
+  deleteFlights();
 };
 
 const addFlights = () => {
   if (flights.length < 15) {
     const from = window.prompt(`Adding flight from?`);
+    checkIsLetter(from);
     const to = window.prompt(`Destination is to?`);
+    checkIsLetter(to);
     const price = window.prompt(`Prise of flight is?`);
+    if (!Number.isInteger(parseInt(price))) {
+      alertInvalidInput();
+    }
+
     let layover = window.prompt(`
 The flight has layover?
 type : true or false`);
@@ -100,18 +135,31 @@ type : true or false`);
       layover = !!"false";
     } else if (layover.toLowerCase() === "false") {
       layover = false;
+    } else {
+      alertInvalidInput();
     }
 
-    flights.push({
-      id: flights[flights.length - 1].id + 1,
-      to: to,
-      from: from,
-      cost: parseInt(price),
-      layover: layover,
-    });
+    if (flights.length === 0) {
+      flights.push({
+        id: 0,
+        to: to,
+        from: from,
+        cost: parseInt(price),
+        layover: layover,
+      });
+    } else {
+      flights.push({
+        id: flights[flights.length - 1].id + 1,
+        to: to,
+        from: from,
+        cost: parseInt(price),
+        layover: layover,
+      });
+    }
+
     alert(`
     Flight was added!`);
-    signInAdmin();
+    addFlights();
   } else {
     alert(`The maximum of flights is 15!`);
     signInAdmin();
@@ -123,16 +171,14 @@ const signInAdmin = () => {
   const addDelete = window.prompt(`
   For delete flights type : DELETE
   For ADD flights type : ADD
-  Back to Main menu type : M
   
   `);
-
-  if (addDelete.toUpperCase() === "ADD") {
-    addFlights();
-  } else if (addDelete.toUpperCase() === "DELETE") {
-    deleteFlights();
-  } else if (addDelete.toUpperCase() === "M") {
+  if (addDelete === null) {
     startMenu();
+  } else if (addDelete.toUpperCase() === "A") {
+    addFlights();
+  } else if (addDelete.toUpperCase() === "D") {
+    deleteFlights();
   } else leaveOrStay();
 };
 
