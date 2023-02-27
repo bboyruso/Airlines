@@ -12,7 +12,7 @@ const flights = [
 ];
 
 const cleanText = (text) => {
-  text = text.replaceAll("id", "Flight");
+  text = text.replace(/\b\id/g, "Flight");
   text = text.replace(/\W/g, " ");
   text = text.replace(/ {1,}/g, " ");
   text = text.replaceAll("cost", "has a cost of");
@@ -21,6 +21,7 @@ const cleanText = (text) => {
   text = text.replaceAll("false", "and doesn't has a layover.");
   return text.replaceAll(".", ".\n");
 };
+
 
 const alertInvalidInput = () => {
   alert(`Invalid data input.`);
