@@ -22,16 +22,15 @@ const cleanText = (text) => {
   return text.replaceAll(".", ".\n");
 };
 
-
 const alertInvalidInput = () => {
-  alert(`Invalid data input.`);
-  addFlights();
+  alert(`Invalid input data.`);
 };
 
 const checkIsLetter = (input) => {
   const letters = /^[A-Za-z]+$/;
   if (!input.match(letters)) {
     alertInvalidInput();
+    return false;
   }
 };
 
@@ -44,8 +43,9 @@ const showFlights = () => {
 const leaveOrStay = () => {
   if (window.confirm("Do you really want to leave?")) {
     alert(`Thanks for Visiting!`);
-    window.open("https://github.com/bboyruso");
+    return;
   } else startMenu();
+  return;
 };
 
 const greeting = () => {
@@ -75,24 +75,28 @@ const startMenu = () => {
 const signInUser = () => {
   alert(`You are in the USER menu.`);
   showFlights();
-  const price = window.prompt("What is the max price per flight");
 
-  if (price === null) {
+  const askForPrice = () => {
+    const price = window.prompt("What is the max price per flight");
+    if (price === null) {
+      leaveOrStay();
+      return;
+    } else if (!Number.isInteger(parseInt(price))) {
+      alertInvalidInput();
+      askForPrice();
+      return;
+    }
+    const choosePrice = flights.filter((flights) => flights.cost <= price);
+
+    const myJSON = JSON.stringify(choosePrice);
+    alert(
+      `We find ${
+        choosePrice.length
+      } flights for you with price ${price} or below :\n${cleanText(myJSON)}`
+    );
     leaveOrStay();
-  }
-
-  const choosePrice = flights.filter((flights) => flights.cost <= price);
-  if (choosePrice.length === 0) {
-    alert(`Here is 0 matches in your query`);
-    signInUser();
-  }
-  const myJSON = JSON.stringify(choosePrice);
-  alert(
-    `We find ${
-      choosePrice.length
-    } flights for you with price ${price} or below :\n${cleanText(myJSON)}`
-  );
-  leaveOrStay();
+  };
+  askForPrice();
 };
 
 const deleteFlights = () => {
@@ -105,10 +109,12 @@ const deleteFlights = () => {
   showFlights();
   const deleteNum =
     window.prompt(`Please type Id number of the flight you want to delete.
+    or press Cancel to back ADMIN menu.
   `);
 
   if (deleteNum === null) {
     signInAdmin();
+    return;
   }
 
   const findID = flights.findIndex(
@@ -116,33 +122,46 @@ const deleteFlights = () => {
   );
   if (findID < 0) {
     alert(`Flight with id: ${deleteNum} doesn't exist`);
-    deleteFlights();
+    return deleteFlights();
   }
 
   flights.splice(findID, 1);
-  deleteFlights();
+  alert(`Flight with id: ${deleteNum} was deleted.`);
+  return signInAdmin();
 };
 
 const addFlights = () => {
-  if (flights.length < 15) {
-    const from = window.prompt(`Adding flight from?`);
-    if (from === null) {
-      signInAdmin();
-    }
-    checkIsLetter(from);
-    const to = window.prompt(`Destination is to?`);
-    if (to === null) {
-      signInAdmin();
-    }
-    checkIsLetter(to);
-    const price = window.prompt(`Prise of flight is?`);
+  let askForPrice = () => {
+    let price = window.prompt(`Price of flight is?`);
     if (!Number.isInteger(parseInt(price))) {
       alertInvalidInput();
-    }
+      return askForPrice();
+    } else return price;
+  };
+  const askWhere = () => {
+    let from = window.prompt(`Adding flight from ?`);
+    if (from === null) {
+      signInAdmin();
+    } else if (checkIsLetter(from) === false) {
+      return askWhere();
+    } else return from;
+  };
 
+  const askToWhere = () => {
+    let to = window.prompt(
+      `Adding flight with Destination to ? Type destination city`
+    );
+    if (to === null) {
+      signInAdmin();
+    } else if (checkIsLetter(to) === false) {
+      return askToWhere();
+    } else return to;
+  };
+
+  const askForLayover = () => {
     let layover = window.prompt(`
-The flight has layover?
-type : true or false`);
+    The flight has layover?
+    type : true or false`);
     if (layover === null) {
       signInAdmin();
     } else if (layover.toLowerCase() === "true") {
@@ -151,29 +170,33 @@ type : true or false`);
       layover = false;
     } else {
       alertInvalidInput();
+      return askForLayover();
     }
+    return layover;
+  };
 
+  if (flights.length < 15) {
     if (flights.length === 0) {
       flights.push({
         id: 0,
-        to: to,
-        from: from,
-        cost: parseInt(price),
-        layover: layover,
       });
     } else {
       flights.push({
         id: flights[flights.length - 1].id + 1,
-        to: to,
-        from: from,
-        cost: parseInt(price),
-        layover: layover,
       });
     }
 
+    flights[flights.length - 1] = {
+      id: flights[flights.length - 1].id,
+      to: askToWhere(),
+      from: askWhere(),
+      cost: parseInt(askForPrice()),
+      layover: askForLayover(),
+    };
+
     alert(`
     Flight was added!`);
-    addFlights();
+    signInAdmin();
   } else {
     alert(`The maximum of flights is 15!`);
     signInAdmin();
@@ -183,17 +206,21 @@ type : true or false`);
 const signInAdmin = () => {
   alert(`You are in the ADMIN menu.`);
   const addDelete = window.prompt(`
-  For delete flights type : DELETE
-  For ADD flights type : ADD
+  For DELETE flights type : D
+  For ADD flights type : A
+  Press Cancel to back Main menu
   
   `);
   if (addDelete === null) {
     startMenu();
-  } else if (addDelete.toUpperCase() === "ADD") {
+  } else if (addDelete.toUpperCase() === "A") {
     addFlights();
-  } else if (addDelete.toUpperCase() === "DELETE") {
+  } else if (addDelete.toUpperCase() === "D") {
     deleteFlights();
-  } else leaveOrStay();
+  } else {
+    alertInvalidInput();
+    signInAdmin();
+  }
 };
 
 greeting();
